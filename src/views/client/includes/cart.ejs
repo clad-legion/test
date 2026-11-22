@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PreBana Cosmetics - Cart</title>
+    <link rel="stylesheet" href="/public/css/shck2.css">
+</head>
+<body>
+    <main class="cart-page">
+        <header class="cart-header">
+            <div class="logo">
+                <img src="/public/uploads/f9defe2877af00458a37ce29ee922df7~tplv-tiktokx-cropcenter_1080_1080.jpeg" alt="PreBana Cosmetics logo">
+                <h2>PreBana<span>Cosmetics</span></h2>
+            </div>
+            <h1>Shopping Cart</h1>
+        </header>
+
+        <div class="cart-layout">
+            <section class="cart-items" aria-label="Cart items">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Product</th>
+                            <th>Price</th>
+                            <th>Quantity</th>
+                            <th>Subtotal</th>
+                            <th><span class="sr-only">Remove</span></th>
+                        </tr>
+                    </thead>
+                    <tbody id="cartItems"></tbody>
+                </table>
+                <p id="emptyCart" class="empty-cart" hidden>Your cart is empty.</p>
+            </section>
+
+            <aside class="cart-summary">
+                <h2>Order Summary</h2>
+                <div class="total-row">
+                    <span>Product Cost:</span>
+                    <strong id="cartProductCost">Ksh 0.00</strong>
+                </div>
+                <div class="total-row">
+                    <span>Shipping Fees:</span>
+                    <strong id="cartShipping">Ksh 30.00</strong>
+                </div>
+                <div class="total-row grand-total">
+                    <span>Total:</span>
+                    <strong id="cartTotal">Ksh 30.00</strong>
+                </div>
+                <button type="button" class="btn-pay" id="checkoutButton">Proceed to Checkout</button>
+            </aside>
+        </div>
+    </main>
+
+    <script>
+        const shippingFees = 30;
+        const defaultCart = [
+            { name: 'Luron', id: 'bd-luron', quantity: 1, price: 10 },
+            { name: 'Toner', id: 'fc-toner', quantity: 1, price: 20 },
+            { name: 'Amara Body Lotion', id: 'bd-amara', quantity: 1, price: 20 },
+            { name: 'Sun Screen', id: 'fc-ss', quantity: 1, price: 20 },
+            { name: 'Night cream', id: 'fc-nc', quantity: 1, price: 20 },
+            { name: 'Day cream', id: 'fc-dc', quantity: 1, price: 20 }
+        ];
+
+        let cart = JSON.parse(sessionStorage.getItem('prebanaCart') || 'null') || defaultCart;
+
+        function saveCart() {
+            sessionStorage.setItem('prebanaCart', JSON.stringify(cart));
+        }
+
+        function renderCart() {
+            const tbody = document.getElementById('cartItems');
+            tbody.innerHTML = '';
+
+            cart.forEach(function (product, index) {
+                const row = document.createElement('tr');
+                row.innerHTML =
+                    '<td><strong>' + product.name + '</strong><br><small>' + product.id + '</small></td>' +
+                    '<td>Ksh ' + product.price.toFixed(2) + '</td>' +
+                    '<td><div class="quantity-control">' +
+                        '<button type="button" class="quantity-button" data-action="decrease" data-index="' + index + '" aria-label="Decrease ' + product.name + ' quantity">-</button>' +
+                        '<input type="number" min="1" value="' + product.quantity + '" data-index="' + index + '" class="cart-quantity" aria-label="' + product.name + ' quantity">' +
+                        '<button type="button" class="quantity-button" data-action="increase" data-index="' + index + '" aria-label="Increase ' + product.name + ' quantity">+</button>' +
+                    '</div></td>' +
+                    '<td class="line-subtotal">Ksh ' + (product.price * product.quantity).toFixed(2) + '</td>' +
+                    '<td><button type="button" class="remove-button" data-index="' + index + '" aria-label="Remove ' + product.name + '">Remove</button></td>';
+                tbody.appendChild(row);
+            });
+
+            const productCost = cart.reduce(function (sum, product) {
+                return sum + (product.price * product.quantity);
+            }, 0);
+            const shipping = cart.length ? shippingFees : 0;
+
+            document.getElementById('cartProductCost').textContent = 'Ksh ' + productCost.toFixed(2);
+            document.getElementById('cartShipping').textContent = 'Ksh ' + shipping.toFixed(2);
+            document.getElementById('cartTotal').textContent = 'Ksh ' + (productCost + shipping).toFixed(2);
+            document.getElementById('emptyCart').hidden = cart.length !== 0;
+            document.getElementById('checkoutButton').disabled = cart.length === 0;
+            saveCart();
+        }
+
+        document.getElementById('cartItems').addEventListener('click', function (event) {
+            const quantityButton = event.target.closest('.quantity-button');
+            const removeButton = event.target.closest('.remove-button');
+
+            if (quantityButton) {
+                const index = Number(quantityButton.dataset.index);
+                cart[index].quantity += quantityButton.dataset.action === 'increase' ? 1 : -1;
+                if (cart[index].quantity < 1) cart[index].quantity = 1;
+                renderCart();
+            }
+
+            if (removeButton) {
+                cart.splice(Number(removeButton.dataset.index), 1);
+                renderCart();
+            }
+        });
+
+        document.getElementById('cartItems').addEventListener('change', function (event) {
+            if (!event.target.matches('.cart-quantity')) return;
+            const index = Number(event.target.dataset.index);
+            cart[index].quantity = Math.max(1, parseInt(event.target.value, 10) || 1);
+            renderCart();
+        });
+
+        document.getElementById('checkoutButton').addEventListener('click', function () {
+            sessionStorage.setItem('prebanaCart', JSON.stringify(cart));
+            window.location.href = '/checkout';
+        });
+
+        renderCart();
+    </script>
+</body>
+</html>

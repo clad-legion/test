@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PreBana || Payment</title>
+    <link rel="stylesheet" href="/public/css/shck2.css">
+</head>
+<body>
+    <div class="paymentData">
+        <div class="logo">
+            <img src="/public/uploads/f9defe2877af00458a37ce29ee922df7~tplv-tiktokx-cropcenter_1080_1080.jpeg" alt="PreBana Cosmetics logo">
+            <h2>PreBana<span>Cosmetics</span></h2>
+        </div>
+
+        <div class="payment-order">
+            <h3>Order Summary</h3>
+            <p><strong>Customer:</strong> <span id="customerName">-</span></p>
+            <p><strong>Phone:</strong> <span id="customerPhone">-</span></p>
+            <p><strong>Location:</strong> <span id="customerLocation">-</span></p>
+        </div>
+
+        <label for="pym">Method of payment:</label>
+        <div class="ty" id="pym">
+            Mpesa: <input type="radio" name="paymentMethod" value="mpesa" checked>
+            Equity: <input type="radio" name="paymentMethod" value="equity" disabled>
+        </div>
+
+        <div class="paycard">
+            <label for="cph">Phone Number: </label>
+            <input type="tel" name="phoneNumber" id="cph" placeholder="07XXXXXXXX">
+            <label for="amount">Amount:</label>
+            <input type="text" id="amount" disabled>
+            <button type="button" id="payButton">Pay</button>
+        </div>
+
+        <div class="awaitpay" id="awaitpay" hidden>
+            <h3>Searching For Payment</h3>
+            <p id="paymentStatus">STK push has been sent.</p>
+            <p>Please check your phone and confirm payment by entering your M-Pesa PIN.</p>
+            <button type="button" id="cancelTransaction">Cancel Transaction</button>
+        </div>
+
+        <div class="recipt">
+            <!-- generate the pdf now with order id and mpesa code -->
+        </div>
+    </div>
+
+    <script>
+        const savedOrder = JSON.parse(sessionStorage.getItem('prebanaOrder') || 'null');
+
+        if (savedOrder) {
+            document.getElementById('customerName').textContent = savedOrder.customerName;
+            document.getElementById('customerPhone').textContent = savedOrder.customerPhone;
+            document.getElementById('customerLocation').textContent = savedOrder.customerLocation;
+            document.getElementById('cph').value = savedOrder.customerPhone;
+
+            const productCost = savedOrder.products.reduce(function (sum, product) {
+                return sum + (Number(product.price) * Number(product.quantity));
+            }, 0);
+            const shippingFees = Number(savedOrder.shippingFees) || 0;
+            const calculatedTotal = productCost + shippingFees;
+
+            document.getElementById('amount').value = 'Ksh ' + calculatedTotal.toFixed(2);
+            savedOrder.total = calculatedTotal;
+            savedOrder.productCost = productCost;
+        }
+
+        document.getElementById('payButton').addEventListener('click', function () {
+            const phone = document.getElementById('cph').value.trim();
+            if (!/^0\d{9}$/.test(phone)) {
+                alert('Enter a valid Kenyan phone number starting with 0.');
+                return;
+            }
+
+            document.getElementById('awaitpay').hidden = false;
+            document.getElementById('paymentStatus').textContent =
+                'STK push has been sent to ' + phone + ' for Ksh ' +
+                (savedOrder ? savedOrder.total.toFixed(2) : '0.00') + '.';
+        });
+
+        document.getElementById('cancelTransaction').addEventListener('click', function () {
+            document.getElementById('awaitpay').hidden = true;
+        });
+    </script>
+
+</body>
+</html>

@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PreBana Cosmetics - Invoice</title>
+    <link rel="stylesheet" href="/public/css/shck2.css">
+</head>
+<body>
+
+    <div class="chck2">
+        <div class="chckForm">
+            <!-- Header -->
+            <div class="tpdt">
+                <div class="logo">
+                    <img src="/public/uploads/f9defe2877af00458a37ce29ee922df7~tplv-tiktokx-cropcenter_1080_1080.jpeg" alt="PreBana Cosmetics logo">
+                    <h2>PreBana<span>Cosmetics</span></h2>
+                </div>
+                <div class="invoice-title">
+                    <h1>INVOICE</h1>
+                    <p>Date: November 22, 2026</p>
+                </div>
+            </div>
+
+            <!-- Billing From & To -->
+            <div class="details-row">
+                <!-- Client Details on the Left -->
+                <div class="slinfo">
+                    <h4>Delivery To (Client)</h4>
+                    <div class="info-item">
+                        <span>Name:</span>
+                        <p>Robert</p>
+                    </div>
+                    <div class="info-item">
+                        <span>Phone Number:</span>
+                        <p>0797510626</p>
+                    </div>
+                    <div class="info-item">
+                        <span>Location:</span>
+                        <p>Thika Town</p>
+                    </div>
+                </div>
+
+                <!-- Seller Details on the Right -->
+                <div class="slinfo">
+                    <h4>From (Vendor)</h4>
+                    <div class="info-item">
+                        <span>Business:</span>
+                        <p>PreBana Cosmetics</p>
+                    </div>
+                    <div class="info-item">
+                        <span>Phone Number:</span>
+                        <p>0712345678</p>
+                    </div>
+                    <div class="info-item">
+                        <span>Shop:</span>
+                        <p>Nairobi</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Product Table -->
+            <div class="cldt">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Product Name</th>
+                            <th>Product ID</th>
+                            <th>Quantity</th>
+                            <th>Price (Ksh)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Luron</td>
+                            <td>bd-luron</td>
+                            <td>1</td>
+                            <td>10.00</td>
+                        </tr>
+                        <tr>
+                            <td>Toner</td>
+                            <td>fc-toner</td>
+                            <td>1</td>
+                            <td>20.00</td>
+                        </tr>
+                        <tr>
+                            <td>Amara Body Lotion</td>
+                            <td>bd-amara</td>
+                            <td>1</td>
+                            <td>20.00</td>
+                        </tr>
+                        <tr>
+                            <td>Sun Screen</td>
+                            <td>fc-ss</td>
+                            <td>1</td>
+                            <td>20.00</td>
+                        </tr>
+                        <tr>
+                            <td>Night cream</td>
+                            <td>fc-nc</td>
+                            <td>1</td>
+                            <td>20.00</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <!-- Totals & Meta -->
+                <div class="summary-section">
+                    <div class="order-meta">
+                        <p><strong>Total Products:</strong> <span id="totalProducts">0</span></p>
+                        <p><strong>Total Quantity:</strong> <span id="totalQuantity">0</span></p>
+                    </div>
+
+                    <div class="totals-box">
+                        <div class="total-row">
+                            <span>Product Cost:</span>
+                            <span id="productCost">Ksh 0.00</span>
+                        </div>
+                        <div class="total-row">
+                            <span>Shipping Fees:</span>
+                            <span id="shippingFees">Ksh 30.00</span>
+                        </div>
+                        <div class="total-row grand-total">
+                            <span>Total:</span>
+                            <span id="orderTotal">Ksh 30.00</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Bottom Action Buttons -->
+        <div class="actions">
+            <button type="button" class="btn-cancel">Cancel Order</button>
+            <!-- <button type="button" class="btn-print" onclick="window.print()">Download / Print PDF</button> -->
+           <button type="button" class="btn-pay" id="proceedToPayment">Proceed to Pay</button>
+        </div>
+    </div>
+
+    <script>
+        const shippingFees = 30;
+
+        const cart = JSON.parse(sessionStorage.getItem('prebanaCart') || 'null');
+        if (cart) {
+            const tbody = document.querySelector('tbody');
+            tbody.innerHTML = '';
+
+            cart.forEach(function (product) {
+                const row = document.createElement('tr');
+                row.innerHTML =
+                    '<td>' + product.name + '</td>' +
+                    '<td>' + product.id + '</td>' +
+                    '<td>' + product.quantity + '</td>' +
+                    '<td>' + Number(product.price).toFixed(2) + '</td>';
+                tbody.appendChild(row);
+            });
+        }
+
+        function calculateOrderTotals() {
+            const productRows = Array.from(document.querySelectorAll('tbody tr'));
+            const products = productRows.map(function (row) {
+                const cells = row.querySelectorAll('td');
+                return {
+                    name: cells[0].textContent.trim(),
+                    id: cells[1].textContent.trim(),
+                    quantity: Number(cells[2].textContent.trim()) || 0,
+                    price: Number(cells[3].textContent.trim()) || 0
+                };
+            });
+
+            const productCost = products.reduce(function (sum, product) {
+                return sum + (product.price * product.quantity);
+            }, 0);
+            const totalQuantity = products.reduce(function (sum, product) {
+                return sum + product.quantity;
+            }, 0);
+            const total = productCost + shippingFees;
+
+            document.getElementById('totalProducts').textContent = products.length;
+            document.getElementById('totalQuantity').textContent = totalQuantity;
+            document.getElementById('productCost').textContent = 'Ksh ' + productCost.toFixed(2);
+            document.getElementById('shippingFees').textContent = 'Ksh ' + shippingFees.toFixed(2);
+            document.getElementById('orderTotal').textContent = 'Ksh ' + total.toFixed(2);
+
+            return { products, productCost, totalQuantity, total };
+        }
+
+        calculateOrderTotals();
+
+        document.getElementById('proceedToPayment').addEventListener('click', function () {
+            const deliveryCard = document.querySelectorAll('.details-row .slinfo')[0];
+            const vendorCard = document.querySelectorAll('.details-row .slinfo')[1];
+            const totals = calculateOrderTotals();
+
+            const order = {
+                customerName: deliveryCard.querySelectorAll('.info-item p')[0].textContent.trim(),
+                customerPhone: deliveryCard.querySelectorAll('.info-item p')[1].textContent.trim(),
+                customerLocation: deliveryCard.querySelectorAll('.info-item p')[2].textContent.trim(),
+                businessName: vendorCard.querySelectorAll('.info-item p')[0].textContent.trim(),
+                businessPhone: vendorCard.querySelectorAll('.info-item p')[1].textContent.trim(),
+                shop: vendorCard.querySelectorAll('.info-item p')[2].textContent.trim(),
+                products: totals.products,
+                totalProducts: totals.products.length,
+                totalQuantity: totals.totalQuantity,
+                productCost: totals.productCost,
+                shippingFees: shippingFees,
+                total: totals.total
+            };
+
+            sessionStorage.setItem('prebanaOrder', JSON.stringify(order));
+            window.location.href = '/payment';
+        });
+    </script>
+
+</body>
+</html>

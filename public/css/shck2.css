@@ -1,0 +1,578 @@
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+body {
+    background-color: #fdf2f8;
+    padding: 40px 20px;
+    display: flex;
+    justify-content: center;
+    color: #333;
+}
+
+/* Base / Desktop A4 Paper Container (769px and above) */
+.chck2 {
+    background-color: #ffffff;
+    width: 100%;
+    max-width: 800px;
+    min-height: 1050px;
+    padding: 50px;
+    border-radius: 6px;
+    border-top: 8px solid #db2777;
+    box-shadow: 0 15px 35px rgba(219, 39, 119, 0.12);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+/* Header Section */
+.tpdt {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    border-bottom: 2px solid #fbcfe8;
+    padding-bottom: 25px;
+    margin-bottom: 30px;
+    gap: 15px;
+}
+
+.logo {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.logo img {
+    width: 45px;
+    height: 45px;
+    object-fit: contain;
+    background-color: #fce7f3;
+    border-radius: 6px;
+}
+
+.logo h2 {
+    font-size: 26px;
+    color: #be185d;
+    letter-spacing: 0.5px;
+}
+
+.logo h2 span {
+    color: #f472b6;
+    font-weight: 400;
+}
+
+.invoice-title {
+    text-align: right;
+}
+
+.invoice-title h1 {
+    font-size: 32px;
+    color: #db2777;
+    letter-spacing: 2px;
+    margin-bottom: 5px;
+}
+
+.invoice-title p {
+    font-size: 13px;
+    color: #831843;
+}
+
+/* Sender & Client Details Grid */
+.details-row {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 40px;
+    gap: 20px;
+}
+
+.slinfo {
+    width: 48%;
+    background: #fdf2f8;
+    padding: 15px 20px;
+    border-left: 4px solid #db2777;
+    border-radius: 0 4px 4px 0;
+}
+
+.slinfo h4 {
+    text-transform: uppercase;
+    font-size: 12px;
+    color: #be185d;
+    margin-bottom: 10px;
+    letter-spacing: 1px;
+}
+
+.info-item {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 6px;
+    font-size: 14px;
+    gap: 10px;
+}
+
+.info-item span {
+    font-weight: 600;
+    color: #831843;
+}
+
+.info-item p {
+    color: #1f2937;
+    font-weight: 500;
+    text-align: right;
+}
+
+/* Product Table */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 30px;
+}
+
+thead {
+    background-color: #db2777;
+    color: #ffffff;
+}
+
+th {
+    padding: 12px 15px;
+    text-align: left;
+    font-size: 13px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+th:last-child, td:last-child {
+    text-align: right;
+}
+
+tbody td {
+    padding: 14px 15px;
+    border-bottom: 1px solid #fce7f3;
+    font-size: 14px;
+}
+
+tbody tr:nth-child(even) {
+    background-color: #fdf2f8;
+}
+
+/* Summary & Totals Section */
+.summary-section {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-top: 20px;
+    gap: 20px;
+}
+
+.order-meta {
+    font-size: 13px;
+    color: #831843;
+    background: #fdf2f8;
+    padding: 15px;
+    border-radius: 4px;
+    border: 1px solid #fbcfe8;
+}
+
+.order-meta p {
+    margin-bottom: 5px;
+}
+
+.totals-box {
+    width: 300px;
+}
+
+.total-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 8px 0;
+    font-size: 14px;
+    border-bottom: 1px solid #fce7f3;
+}
+
+.total-row.grand-total {
+    border-bottom: none;
+    border-top: 2px solid #db2777;
+    margin-top: 8px;
+    padding-top: 12px;
+    font-size: 18px;
+    font-weight: 700;
+    color: #be185d;
+}
+
+/* Action Buttons */
+.actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 15px;
+    margin-top: 50px;
+    padding-top: 20px;
+    border-top: 1px solid #fce7f3;
+}
+
+button {
+    padding: 12px 24px;
+    font-size: 14px;
+    font-weight: 600;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: opacity 0.2s ease;
+}
+
+button:hover {
+    opacity: 0.9;
+}
+
+.btn-pay {
+    background-color: #db2777;
+    color: #ffffff;
+}
+
+.btn-print {
+    background-color: #fce7f3;
+    color: #be185d;
+    border: 1px solid #f9a8d4;
+}
+
+.btn-cancel {
+    background-color: #ffffff;
+    color: #6b7280;
+    border: 1px solid #e5e7eb;
+}
+
+/* =========================================================
+   RESPONSIVE MEDIA QUERIES FOR ALL DEVICE SIZES
+   ========================================================= */
+
+/* 1. Large Desktops & 4K Screens (1440px and up) */
+@media screen and (min-width: 1440px) {
+    body {
+        padding: 60px 20px;
+    }
+    .chck2 {
+        max-width: 850px;
+    }
+}
+
+/* 2. Laptops & Small Desktops (769px to 1024px) */
+@media screen and (max-width: 1024px) {
+    body {
+        padding: 30px 15px;
+    }
+    .chck2 {
+        padding: 40px;
+    }
+}
+
+/* 3. Tablets & iPads (481px to 768px) */
+@media screen and (max-width: 768px) {
+    body {
+        padding: 20px 12px;
+    }
+    .chck2 {
+        padding: 30px 25px;
+        min-height: auto; /* Removes forced A4 height on tablets */
+    }
+    .details-row {
+        flex-direction: column; /* Stacks Client & Vendor boxes */
+        gap: 15px;
+    }
+    .slinfo {
+        width: 100%;
+    }
+    .summary-section {
+        flex-direction: column-reverse; /* Puts totals on top, meta below */
+        gap: 20px;
+    }
+    .totals-box, .order-meta {
+        width: 100%;
+    }
+}
+
+/* 4. Standard Smartphones (361px to 480px) */
+@media screen and (max-width: 480px) {
+    body {
+        padding: 10px 8px;
+    }
+    .chck2 {
+        padding: 20px 15px;
+        border-top-width: 6px;
+    }
+    .tpdt {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    .invoice-title {
+        text-align: left;
+        margin-top: 10px;
+    }
+    .invoice-title h1 {
+        font-size: 26px;
+    }
+    .logo h2 {
+        font-size: 22px;
+    }
+    /* Makes table scrollable horizontally so columns never squish */
+    table {
+        display: block;
+        overflow-x: auto;
+        white-space: nowrap;
+    }
+    th, td {
+        padding: 10px 12px;
+        font-size: 13px;
+    }
+    /* Stacks buttons full-width for easy thumb tapping */
+    .actions {
+        flex-direction: column-reverse;
+        gap: 10px;
+        margin-top: 30px;
+    }
+    button {
+        width: 100%;
+        padding: 14px;
+    }
+}
+
+/* 5. Extra Small Phones / Foldables (360px and below) */
+@media screen and (max-width: 360px) {
+    .chck2 {
+        padding: 15px 12px;
+    }
+    .logo h2 {
+        font-size: 19px;
+    }
+    .info-item {
+        font-size: 12px;
+    }
+    .total-row.grand-total {
+        font-size: 16px;
+    }
+}
+
+/* 6. Print / Save as PDF Mode (Overrides all screen sizes) */
+@media print {
+    body {
+        background-color: #ffffff;
+        padding: 0;
+    }
+    .chck2 {
+        box-shadow: none;
+        max-width: 100%;
+        min-height: auto;
+        padding: 20px;
+        border-top: 6px solid #db2777;
+    }
+    .details-row {
+        flex-direction: row !important; /* Keeps side-by-side layout on PDF even if printed from a phone */
+    }
+    .slinfo {
+        width: 48% !important;
+    }
+    .summary-section {
+        flex-direction: row !important;
+    }
+    .totals-box {
+        width: 300px !important;
+    }
+    .actions {
+        display: none;
+    }
+}
+.logo {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.logo img {
+    display: block;
+    width: 92px;
+    height: 92px;
+    object-fit: contain;
+}
+
+/* Payment Page */
+.paymentData {
+    background: #ffffff;
+    width: 100%;
+    max-width: 520px;
+    padding: 35px;
+    border-radius: 6px;
+    border-top: 8px solid #db2777;
+    box-shadow: 0 15px 35px rgba(219, 39, 119, 0.12);
+}
+
+.paymentData .logo {
+    margin-bottom: 25px;
+}
+
+.payment-order {
+    background: #fdf2f8;
+    border-left: 4px solid #db2777;
+    border-radius: 0 4px 4px 0;
+    padding: 16px 20px;
+    margin-bottom: 20px;
+}
+
+.payment-order h3 {
+    color: #be185d;
+    margin-bottom: 10px;
+}
+
+.payment-order p {
+    margin: 6px 0;
+}
+
+.ty {
+    margin: 8px 0 20px;
+}
+
+.paycard {
+    display: grid;
+    gap: 8px;
+}
+
+.paycard input {
+    width: 100%;
+    border: 1px solid #d1d5db;
+    border-radius: 4px;
+    padding: 12px;
+    margin-bottom: 8px;
+}
+
+.awaitpay {
+    margin-top: 20px;
+    background: #fff7fb;
+    border: 1px solid #fbcfe8;
+    border-radius: 4px;
+    padding: 16px;
+}
+
+.awaitpay p {
+    margin: 8px 0;
+}
+
+/* Cart */
+.cart-page {
+    width: 100%;
+    max-width: 1000px;
+    background: #ffffff;
+    border-radius: 6px;
+    border-top: 8px solid #db2777;
+    box-shadow: 0 15px 35px rgba(219, 39, 119, 0.12);
+    padding: 35px;
+}
+
+.cart-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 2px solid #fbcfe8;
+    padding-bottom: 20px;
+    margin-bottom: 25px;
+}
+
+.cart-header h1 {
+    color: #db2777;
+}
+
+.cart-layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 280px;
+    gap: 25px;
+}
+
+.cart-items {
+    min-width: 0;
+}
+
+.quantity-control {
+    display: inline-flex;
+    align-items: center;
+}
+
+.quantity-button {
+    width: 36px;
+    height: 36px;
+    padding: 0;
+    border: 1px solid #d1d5db;
+    background: #fdf2f8;
+    color: #be185d;
+}
+
+.cart-quantity {
+    width: 52px;
+    height: 36px;
+    border-width: 1px 0;
+    border-style: solid;
+    border-color: #d1d5db;
+    text-align: center;
+}
+
+.remove-button {
+    background: #ffffff;
+    color: #dc2626;
+    border: 1px solid #fecaca;
+    padding: 8px 12px;
+}
+
+.line-subtotal {
+    white-space: nowrap;
+}
+
+.cart-summary {
+    background: #fdf2f8;
+    border: 1px solid #fbcfe8;
+    border-radius: 4px;
+    padding: 20px;
+    align-self: start;
+}
+
+.cart-summary h2 {
+    color: #be185d;
+    margin-bottom: 15px;
+}
+
+.cart-summary .btn-pay {
+    width: 100%;
+    margin-top: 20px;
+}
+
+.empty-cart {
+    text-align: center;
+    padding: 30px;
+    color: #831843;
+}
+
+.sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+}
+
+@media screen and (max-width: 768px) {
+    .cart-page {
+        padding: 20px 12px;
+    }
+    .cart-header {
+        align-items: flex-start;
+        flex-direction: column;
+        gap: 10px;
+    }
+    .cart-layout {
+        grid-template-columns: 1fr;
+    }
+    .cart-items table {
+        display: block;
+        overflow-x: auto;
+    }
+}
