@@ -180,10 +180,6 @@
                 alert('Your order details are missing. Please return to checkout.');
                 return;
             }
-            savedOrder.customerName = payerName;
-            savedOrder.customerPhone = phone;
-            sessionStorage.setItem('prebanaOrder', JSON.stringify(savedOrder));
-
             document.getElementById('awaitpay').hidden = false;
             document.getElementById('paymentStatus').textContent = 'Sending M-Pesa request...';
             document.getElementById('payButton').disabled = true;

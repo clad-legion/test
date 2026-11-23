@@ -46,7 +46,10 @@
             }
 
             .logo img {
-                display: none !important;
+                display: block !important;
+                width: 12mm !important;
+                height: 12mm !important;
+                object-fit: contain !important;
             }
 
             .logo h2,
@@ -142,6 +145,19 @@
                 margin-top: 2mm !important;
             }
 
+            .receipt-delivery {
+                margin-top: 3mm;
+                padding: 2mm 0 0;
+                border-top: 1px dashed #000;
+                font-size: 8pt;
+                text-align: center;
+            }
+
+            .receipt-delivery h4,
+            .receipt-delivery p {
+                margin: 1mm 0;
+            }
+
             .order-meta {
                 margin-bottom: 2mm;
                 padding: 2mm !important;
@@ -231,6 +247,11 @@
                         <div class="total-row grand-total"><span id="orderTotalLabel">Total Paid:</span><span id="orderTotal">Ksh 0.00</span></div>
                     </div>
                 </div>
+                <div class="receipt-delivery">
+                    <h4>Delivery details</h4>
+                    <p>Location: <span id="deliveryLocation">-</span></p>
+                    <p>Phone: <span id="deliveryPhone">-</span></p>
+                </div>
             </div>
         </div>
 
@@ -257,6 +278,8 @@
             document.getElementById('payerName').textContent = payerName;
             document.getElementById('payerPhone').textContent = maskPhone(payerPhone);
             document.getElementById('payerLocation').textContent = order.customerLocation || '-';
+            document.getElementById('deliveryLocation').textContent = order.customerLocation || '-';
+            document.getElementById('deliveryPhone').textContent = maskPhone(order.customerPhone || '-');
             document.getElementById('mpesaCode').textContent = receipt.mpesaCode || '-';
             document.getElementById('paymentPayerName').textContent = payerName;
             document.getElementById('paymentPhone').textContent = maskPhone(payerPhone);
