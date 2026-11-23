@@ -123,6 +123,17 @@ body {
     text-align: right;
 }
 
+.info-item input {
+    width: 65%;
+    min-width: 0;
+    border: 1px solid #e8cdd8;
+    border-radius: 4px;
+    padding: 5px 7px;
+    color: #1f2937;
+    background: #ffffff;
+    text-align: right;
+}
+
 /* Product Table */
 table {
     width: 100%;

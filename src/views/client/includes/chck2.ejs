@@ -37,7 +37,14 @@
                     </div>
                     <div class="info-item">
                         <span>Location:</span>
-                        <p>Thika Town</p>
+                        <input
+                            id="deliveryLocation"
+                            type="text"
+                            maxlength="200"
+                            placeholder="Enter your preferred delivery location"
+                            autocomplete="street-address"
+                            required
+                        >
                     </div>
                 </div>
 
@@ -131,7 +138,7 @@
 
         <!-- Bottom Action Buttons -->
         <div class="actions">
-            <button type="button" class="btn-cancel">Cancel Order</button>
+            <button type="button" class="btn-cancel" id="cancelOrder">Cancel Order</button>
             <!-- <button type="button" class="btn-print" onclick="window.print()">Download / Print PDF</button> -->
            <button type="button" class="btn-pay" id="proceedToPayment">Proceed to Pay</button>
         </div>
@@ -192,15 +199,27 @@
 
         calculateOrderTotals();
 
+        document.getElementById('cancelOrder').addEventListener('click', function () {
+            sessionStorage.removeItem('prebanaCart');
+            sessionStorage.removeItem('prebanaOrder');
+            window.location.href = '/preBana/cart';
+        });
+
         document.getElementById('proceedToPayment').addEventListener('click', function () {
             const deliveryCard = document.querySelectorAll('.details-row .slinfo')[0];
             const vendorCard = document.querySelectorAll('.details-row .slinfo')[1];
+            const deliveryLocation = document.getElementById('deliveryLocation').value.trim();
+            if (deliveryLocation.length < 3) {
+                alert('Enter your preferred delivery location.');
+                document.getElementById('deliveryLocation').focus();
+                return;
+            }
             const totals = calculateOrderTotals();
 
             const order = {
                 customerName: deliveryCard.querySelectorAll('.info-item p')[0].textContent.trim(),
                 customerPhone: deliveryCard.querySelectorAll('.info-item p')[1].textContent.trim(),
-                customerLocation: deliveryCard.querySelectorAll('.info-item p')[2].textContent.trim(),
+                customerLocation: deliveryLocation,
                 businessName: vendorCard.querySelectorAll('.info-item p')[0].textContent.trim(),
                 businessPhone: vendorCard.querySelectorAll('.info-item p')[1].textContent.trim(),
                 shop: vendorCard.querySelectorAll('.info-item p')[2].textContent.trim(),

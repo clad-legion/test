@@ -280,7 +280,7 @@
             document.getElementById('payerPhone').textContent = maskPhone(payerPhone);
             document.getElementById('payerLocation').textContent = order.customerLocation || '-';
             document.getElementById('deliveryLocation').textContent = order.customerLocation || '-';
-            document.getElementById('deliveryPhone').textContent = maskPhone(order.customerPhone || '-');
+            document.getElementById('deliveryPhone').textContent = order.customerPhone || '-';
             document.getElementById('mpesaCode').textContent = receipt.mpesaCode || '-';
             document.getElementById('paymentPayerName').textContent = payerName;
             document.getElementById('paymentPhone').textContent = maskPhone(payerPhone);
@@ -417,7 +417,7 @@
                 '------------------------------------------',
                 'DELIVERY',
                 'Location: ' + (order.customerLocation || '-'),
-                'Phone: ' + maskPhone(order.customerPhone || '-')
+                'Phone: ' + (order.customerPhone || '-')
             );
 
             const wrappedLines = lines.reduce(function (all, line) {
