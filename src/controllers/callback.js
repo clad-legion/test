@@ -1,11 +1,13 @@
-const transactions = new Map();
+const { getTransaction, saveTransaction } = require('../models/mpesaTransactions');
 
 function registerTransaction(checkoutRequestId, transaction) {
-    transactions.set(checkoutRequestId, transaction);
-}
-
-function getTransaction(checkoutRequestId) {
-    return transactions.get(checkoutRequestId);
+    const existing = getTransaction(checkoutRequestId);
+    saveTransaction(checkoutRequestId, {
+        ...transaction,
+        ...existing,
+        amount: transaction.amount,
+        phone: transaction.phone
+    });
 }
 
 function mpesaCallback(req, res) {
@@ -39,18 +41,26 @@ function mpesaCallback(req, res) {
         }
     }
 
-    const existing = transactions.get(checkoutRequestId) || {};
-    transactions.set(checkoutRequestId, {
-        ...existing,
-        merchantRequestId: callback.MerchantRequestID,
-        status: callback.ResultCode === 0 ? 'completed' : 'failed',
-        resultCode: callback.ResultCode,
-        resultDescription: callback.ResultDesc,
-        mpesaReceiptNumber: values.MpesaReceiptNumber || null,
-        transactionDate: values.TransactionDate || null,
-        amountPaid: values.Amount != null ? Number(values.Amount) : null,
-        phonePaid: values.PhoneNumber ? String(values.PhoneNumber) : null
-    });
+    const existing = getTransaction(checkoutRequestId) || {};
+    try {
+        saveTransaction(checkoutRequestId, {
+            ...existing,
+            merchantRequestId: callback.MerchantRequestID,
+            status: callback.ResultCode === 0 ? 'completed' : 'failed',
+            resultCode: callback.ResultCode,
+            resultDescription: callback.ResultDesc,
+            mpesaReceiptNumber: values.MpesaReceiptNumber || null,
+            transactionDate: values.TransactionDate || null,
+            amountPaid: values.Amount != null ? Number(values.Amount) : null,
+            phonePaid: values.PhoneNumber ? String(values.PhoneNumber) : null
+        });
+    } catch (error) {
+        console.error('Failed to save M-Pesa callback:', error);
+        return res.status(500).json({
+            ResultCode: 1,
+            ResultDesc: 'Could not save the M-Pesa callback.'
+        });
+    }
 
     return res.status(200).json({
         ResultCode: 0,

@@ -38,7 +38,7 @@
             <h3>Searching For Payment</h3>
             <p id="paymentStatus">STK push has been sent.</p>
             <p>Please check your phone and confirm payment by entering your M-Pesa PIN.</p>
-            <button type="button" id="cancelTransaction">Cancel Transaction</button>
+            <button type="button" id="cancelTransaction">Hide Status</button>
         </div>
 
         <div class="recipt">
@@ -67,11 +67,26 @@
         }
 
         let paymentPoll = null;
+        const checkoutStorageKey = 'prebanaCheckoutRequestId';
+
+        function startPaymentPolling(checkoutRequestId) {
+            document.getElementById('awaitpay').hidden = false;
+            document.getElementById('payButton').disabled = true;
+            if (paymentPoll) clearInterval(paymentPoll);
+            paymentPoll = setInterval(function () {
+                checkPaymentStatus(checkoutRequestId);
+            }, 3000);
+            checkPaymentStatus(checkoutRequestId);
+        }
 
         async function checkPaymentStatus(checkoutRequestId) {
             try {
                 const response = await fetch('/preBana/payment/status/' + encodeURIComponent(checkoutRequestId));
-                if (!response.ok) return;
+                if (!response.ok) {
+                    document.getElementById('paymentStatus').textContent =
+                        'Could not check payment status (HTTP ' + response.status + '). Retrying...';
+                    return;
+                }
                 const status = await response.json();
                 document.getElementById('paymentStatus').textContent =
                     status.status === 'completed'
@@ -82,10 +97,19 @@
 
                 if (status.status === 'completed' || status.status === 'failed') {
                     clearInterval(paymentPoll);
+                    sessionStorage.removeItem(checkoutStorageKey);
+                    document.getElementById('payButton').disabled = status.status === 'completed';
                 }
             } catch (error) {
-                // Keep polling when a temporary network error occurs.
+                document.getElementById('paymentStatus').textContent =
+                    'Could not connect to check payment status. Retrying...';
             }
+        }
+
+        const pendingCheckoutRequestId = sessionStorage.getItem(checkoutStorageKey);
+        if (pendingCheckoutRequestId) {
+            document.getElementById('paymentStatus').textContent = 'Checking your previous payment...';
+            startPaymentPolling(pendingCheckoutRequestId);
         }
 
         document.getElementById('payButton').addEventListener('click', async function () {
@@ -113,16 +137,20 @@
                     })
                 });
                 const result = await response.json();
-                if (!response.ok) throw new Error(result.error || 'Could not initiate payment.');
+                if (!response.ok) {
+                    if (result.checkoutRequestId) {
+                        sessionStorage.setItem(checkoutStorageKey, result.checkoutRequestId);
+                        document.getElementById('paymentStatus').textContent = result.error;
+                        startPaymentPolling(result.checkoutRequestId);
+                        return;
+                    }
+                    throw new Error(result.error || 'Could not initiate payment.');
+                }
 
+                sessionStorage.setItem(checkoutStorageKey, result.checkoutRequestId);
                 document.getElementById('paymentStatus').textContent =
                     'STK push sent to ' + phone + ' for Ksh ' + result.amount.toFixed(2) + '.';
-                paymentPoll = setInterval(function () {
-                    checkPaymentStatus(result.checkoutRequestId);
-                }, 3000);
-                setTimeout(function () {
-                    checkPaymentStatus(result.checkoutRequestId);
-                }, 1000);
+                startPaymentPolling(result.checkoutRequestId);
             } catch (error) {
                 document.getElementById('paymentStatus').textContent = error.message;
                 document.getElementById('payButton').disabled = false;
@@ -131,8 +159,6 @@
 
         document.getElementById('cancelTransaction').addEventListener('click', function () {
             document.getElementById('awaitpay').hidden = true;
-            if (paymentPoll) clearInterval(paymentPoll);
-            document.getElementById('payButton').disabled = false;
         });
     </script>
 

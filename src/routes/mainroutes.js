@@ -12,6 +12,7 @@ const products = [
     { name: 'Day Cream', id: 'fc-dc', price: 20 }
 ]
 
+
 router.get(['/store', '/shop/home'], (req, res) => {
     res.status(200).render('client/store', { products })
 })
