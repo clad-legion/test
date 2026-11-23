@@ -5,6 +5,176 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>PreBana Cosmetics - Final Receipt</title>
     <link rel="stylesheet" href="/css/shck2.css">
+    <style>
+        @page {
+            size: 80mm auto;
+            margin: 3mm;
+        }
+
+        @media print {
+            html,
+            body {
+                display: block !important;
+                width: 74mm !important;
+                min-width: 0 !important;
+                margin: 0 !important;
+                padding: 0 !important;
+                background: #fff !important;
+                color: #000 !important;
+            }
+
+            .chck2.final-receipt {
+                width: 100% !important;
+                max-width: none !important;
+                min-height: 0 !important;
+                margin: 0 !important;
+                padding: 0 !important;
+                border: 0 !important;
+                border-radius: 0 !important;
+                box-shadow: none !important;
+            }
+
+            .tpdt {
+                display: block !important;
+                margin: 0 0 3mm !important;
+                padding: 0 0 2mm !important;
+                border-bottom: 1px dashed #000 !important;
+            }
+
+            .logo {
+                justify-content: center !important;
+            }
+
+            .logo img {
+                display: none !important;
+            }
+
+            .logo h2,
+            .logo h2 span,
+            .invoice-title h1,
+            .invoice-title p,
+            .slinfo h4,
+            .info-item span,
+            .info-item p,
+            th,
+            td,
+            .order-meta,
+            .total-row {
+                color: #000 !important;
+            }
+
+            .logo h2 {
+                font-size: 15pt !important;
+                text-align: center;
+            }
+
+            .logo h2 span {
+                display: inline !important;
+                margin-left: 2mm;
+                font-size: 9pt !important;
+                letter-spacing: 0 !important;
+            }
+
+            .invoice-title {
+                margin-top: 2mm;
+                text-align: center !important;
+            }
+
+            .invoice-title h1 {
+                font-size: 16pt !important;
+            }
+
+            .details-row {
+                display: block !important;
+                margin: 0 0 3mm !important;
+            }
+
+            .slinfo {
+                width: 100% !important;
+                margin: 0 !important;
+                padding: 2mm 0 !important;
+                border: 0 !important;
+                border-bottom: 1px dashed #000 !important;
+                border-radius: 0 !important;
+                background: #fff !important;
+            }
+
+            .slinfo h4 {
+                margin-bottom: 1mm !important;
+                font-size: 8pt !important;
+            }
+
+            .info-item {
+                margin-bottom: 1mm !important;
+                gap: 2mm !important;
+                font-size: 8pt !important;
+            }
+
+            .info-item p {
+                overflow-wrap: anywhere;
+            }
+
+            table {
+                width: 100% !important;
+                table-layout: fixed;
+                margin-bottom: 2mm !important;
+                font-size: 7pt !important;
+            }
+
+            th,
+            tbody td {
+                padding: 1.5mm 1mm !important;
+                overflow-wrap: anywhere;
+                font-size: 7pt !important;
+            }
+
+            th:nth-child(1),
+            td:nth-child(1) { width: 36%; }
+            th:nth-child(2),
+            td:nth-child(2) { width: 25%; }
+            th:nth-child(3),
+            td:nth-child(3) { width: 12%; }
+            th:nth-child(4),
+            td:nth-child(4) { width: 27%; }
+
+            .summary-section {
+                display: block !important;
+                margin-top: 2mm !important;
+            }
+
+            .order-meta {
+                margin-bottom: 2mm;
+                padding: 2mm !important;
+                border: 1px dashed #000 !important;
+                background: #fff !important;
+                font-size: 8pt !important;
+            }
+
+            .totals-box {
+                width: 100% !important;
+            }
+
+            .total-row {
+                padding: 1mm 0 !important;
+                font-size: 8pt !important;
+            }
+
+            .total-row.grand-total {
+                border-top: 1px dashed #000 !important;
+                font-size: 10pt !important;
+            }
+
+            .actions {
+                display: none !important;
+            }
+
+            tr,
+            .slinfo,
+            .summary-section {
+                break-inside: avoid;
+            }
+        }
+    </style>
 </head>
 <body>
     <div class="chck2 final-receipt">
@@ -33,7 +203,6 @@
                     <div class="info-item"><span>Paid by:</span><p id="paymentPayerName">-</p></div>
                     <div class="info-item"><span>Phone:</span><p id="paymentPhone">-</p></div>
                     <div class="info-item"><span id="amountPaidLabel">Amount paid:</span><p id="amountPaid">-</p></div>
-                    <div class="info-item"><span>Amount paid:</span><p id="amountPaid">-</p></div>
                     <div class="info-item"><span>Status:</span><p id="receiptStatus">Paid</p></div>
                 </div>
             </div>
