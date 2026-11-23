@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PreBana Cosmetics - Final Receipt</title>
+    <link rel="stylesheet" href="/css/shck2.css">
+</head>
+<body>
+    <div class="chck2 final-receipt">
+        <div class="chckForm">
+            <div class="tpdt">
+                <div class="logo">
+                    <img src="/uploads/f9defe2877af00458a37ce29ee922df7~tplv-tiktokx-cropcenter_1080_1080.jpeg" alt="PreBana Cosmetics logo">
+                    <h2>PreBana<span>Cosmetics</span></h2>
+                </div>
+                <div class="invoice-title">
+                    <h1>RECEIPT</h1>
+                    <p id="receiptDate">Date: -</p>
+                </div>
+            </div>
+
+            <div class="details-row">
+                <div class="slinfo">
+                    <h4>Paid By</h4>
+                    <div class="info-item"><span>Name:</span><p id="payerName">-</p></div>
+                    <div class="info-item"><span>Phone:</span><p id="payerPhone">-</p></div>
+                    <div class="info-item"><span>Location:</span><p id="payerLocation">-</p></div>
+                </div>
+                <div class="slinfo">
+                    <h4>Payment Details</h4>
+                    <div class="info-item"><span>M-Pesa code:</span><p id="mpesaCode">-</p></div>
+                    <div class="info-item"><span>Checkout ID:</span><p id="checkoutId">-</p></div>
+                    <div class="info-item"><span>Status:</span><p>Paid</p></div>
+                </div>
+            </div>
+
+            <div class="cldt">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Product Name</th>
+                            <th>Product ID</th>
+                            <th>Quantity</th>
+                            <th>Price (Ksh)</th>
+                        </tr>
+                    </thead>
+                    <tbody id="receiptItems"></tbody>
+                </table>
+
+                <div class="summary-section">
+                    <div class="order-meta">
+                        <p><strong>Total Products:</strong> <span id="totalProducts">0</span></p>
+                        <p><strong>Total Quantity:</strong> <span id="totalQuantity">0</span></p>
+                    </div>
+                    <div class="totals-box">
+                        <div class="total-row"><span>Product Cost:</span><span id="productCost">Ksh 0.00</span></div>
+                        <div class="total-row"><span>Shipping Fees:</span><span id="shippingFees">Ksh 0.00</span></div>
+                        <div class="total-row grand-total"><span>Total Paid:</span><span id="orderTotal">Ksh 0.00</span></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="actions">
+            <button type="button" class="btn-cancel" onclick="window.location.href='/preBana/store'">Back to shop</button>
+            <button type="button" class="btn-pay" onclick="window.print()">Print receipt</button>
+        </div>
+    </div>
+
+    <script>
+        const receipt = JSON.parse(sessionStorage.getItem('prebanaFinalReceipt') || 'null');
+        const order = receipt && receipt.order ? receipt.order : null;
+
+        if (!receipt || !order) {
+            document.querySelector('.final-receipt').innerHTML =
+                '<p style="padding:40px">Receipt details are unavailable. Please complete payment again.</p>';
+        } else {
+            const payerName = receipt.payerName || order.customerName || '-';
+            const payerPhone = receipt.phone || order.customerPhone || '-';
+            const paidDate = receipt.paidAt ? new Date(receipt.paidAt) : new Date();
+
+            document.getElementById('payerName').textContent = payerName;
+            document.getElementById('payerPhone').textContent = payerPhone;
+            document.getElementById('payerLocation').textContent = order.customerLocation || '-';
+            document.getElementById('mpesaCode').textContent = receipt.mpesaCode || '-';
+            document.getElementById('checkoutId').textContent = receipt.checkoutRequestId || '-';
+            document.getElementById('receiptDate').textContent =
+                'Date: ' + (isNaN(paidDate.getTime()) ? '-' : paidDate.toLocaleString());
+
+            const tbody = document.getElementById('receiptItems');
+            let totalQuantity = 0;
+
+            (order.products || []).forEach(function (product) {
+                const quantity = Number(product.quantity) || 0;
+                totalQuantity += quantity;
+                const row = document.createElement('tr');
+                row.innerHTML =
+                    '<td>' + escapeHtml(product.name) + '</td>' +
+                    '<td>' + escapeHtml(product.id) + '</td>' +
+                    '<td>' + quantity + '</td>' +
+                    '<td>' + (Number(product.price) * quantity).toFixed(2) + '</td>';
+                tbody.appendChild(row);
+            });
+
+            const productCost = Number(order.productCost) ||
+                (order.products || []).reduce(function (sum, product) {
+                    return sum + (Number(product.price) * (Number(product.quantity) || 0));
+                }, 0);
+            const shippingFees = Number(order.shippingFees) || 0;
+            const total = Number(receipt.amount) || productCost + shippingFees;
+
+            document.getElementById('totalProducts').textContent = (order.products || []).length;
+            document.getElementById('totalQuantity').textContent = totalQuantity;
+            document.getElementById('productCost').textContent = 'Ksh ' + productCost.toFixed(2);
+            document.getElementById('shippingFees').textContent = 'Ksh ' + shippingFees.toFixed(2);
+            document.getElementById('orderTotal').textContent = 'Ksh ' + total.toFixed(2);
+        }
+
+        function escapeHtml(value) {
+            return String(value).replace(/[&<>"']/g, function (character) {
+                return {
+                    '&': '&amp;',
+                    '<': '&lt;',
+                    '>': '&gt;',
+                    '"': '&quot;',
+                    "'": '&#039;'
+                }[character];
+            });
+        }
+    </script>
+</body>
+</html>

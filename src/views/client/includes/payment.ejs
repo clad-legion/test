@@ -27,6 +27,8 @@
         </div>
 
         <div class="paycard">
+            <label for="payerName">Payer name:</label>
+            <input type="text" name="payerName" id="payerName" maxlength="80" autocomplete="name" required>
             <label for="cph">Phone Number: </label>
             <input type="tel" name="phoneNumber" id="cph" placeholder="07XXXXXXXX">
             <label for="amount">Amount:</label>
@@ -41,8 +43,12 @@
             <button type="button" id="cancelTransaction">Hide Status</button>
         </div>
 
-        <div class="recipt">
-            <!-- generate the pdf now with order id and mpesa code -->
+        <div class="recipt" id="paymentReceipt" hidden>
+            <h3>Payment successful</h3>
+            <p><strong>Payer:</strong> <span id="receiptPayer">-</span></p>
+            <p><strong>Phone:</strong> <span id="receiptPhone">-</span></p>
+            <p><strong>M-Pesa code:</strong> <span id="receiptMpesaCode">-</span></p>
+            <button type="button" id="viewReceipt">View final receipt</button>
         </div>
     </div>
 
@@ -53,6 +59,7 @@
             document.getElementById('customerName').textContent = savedOrder.customerName;
             document.getElementById('customerPhone').textContent = savedOrder.customerPhone;
             document.getElementById('customerLocation').textContent = savedOrder.customerLocation;
+            document.getElementById('payerName').value = savedOrder.customerName || '';
             document.getElementById('cph').value = savedOrder.customerPhone;
 
             const productCost = savedOrder.products.reduce(function (sum, product) {
@@ -99,6 +106,25 @@
                     clearInterval(paymentPoll);
                     sessionStorage.removeItem(checkoutStorageKey);
                     document.getElementById('payButton').disabled = status.status === 'completed';
+
+                    if (status.status === 'completed') {
+                        const payerName = document.getElementById('payerName').value.trim();
+                        const receipt = {
+                            payerName: payerName || (savedOrder ? savedOrder.customerName : ''),
+                            phone: document.getElementById('cph').value.trim(),
+                            mpesaCode: status.mpesaReceiptNumber || '',
+                            checkoutRequestId: checkoutRequestId,
+                            amount: status.amount || (savedOrder ? savedOrder.total : 0),
+                            paidAt: status.transactionDate || new Date().toISOString(),
+                            order: savedOrder
+                        };
+                        sessionStorage.setItem('prebanaFinalReceipt', JSON.stringify(receipt));
+
+                        document.getElementById('receiptPayer').textContent = receipt.payerName || '-';
+                        document.getElementById('receiptPhone').textContent = receipt.phone || '-';
+                        document.getElementById('receiptMpesaCode').textContent = receipt.mpesaCode || '-';
+                        document.getElementById('paymentReceipt').hidden = false;
+                    }
                 }
             } catch (error) {
                 document.getElementById('paymentStatus').textContent =
@@ -114,6 +140,11 @@
 
         document.getElementById('payButton').addEventListener('click', async function () {
             const phone = document.getElementById('cph').value.trim();
+            const payerName = document.getElementById('payerName').value.trim();
+            if (payerName.length < 2) {
+                alert('Enter the name of the person paying.');
+                return;
+            }
             if (!/^0\d{9}$/.test(phone)) {
                 alert('Enter a valid Kenyan phone number starting with 0.');
                 return;
@@ -122,6 +153,9 @@
                 alert('Your order details are missing. Please return to checkout.');
                 return;
             }
+            savedOrder.customerName = payerName;
+            savedOrder.customerPhone = phone;
+            sessionStorage.setItem('prebanaOrder', JSON.stringify(savedOrder));
 
             document.getElementById('awaitpay').hidden = false;
             document.getElementById('paymentStatus').textContent = 'Sending M-Pesa request...';
@@ -159,6 +193,10 @@
 
         document.getElementById('cancelTransaction').addEventListener('click', function () {
             document.getElementById('awaitpay').hidden = true;
+        });
+
+        document.getElementById('viewReceipt').addEventListener('click', function () {
+            window.location.href = '/preBana/finalrecipt';
         });
     </script>
 

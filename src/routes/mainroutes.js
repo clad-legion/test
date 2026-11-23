@@ -29,6 +29,10 @@ router.get('/payment', (req, res) => {
     res.status(200).render('client/includes/payment')
 })
 
+router.get(['/finalrecipt', '/finalreceipt', '/shop/finalrecipt'], (req, res) => {
+    res.status(200).render('client/includes/finalrecipt')
+})
+
 router.post('/payment/stk', stkPush)
 router.post('/payment/callback', mpesaCallback)
 router.get('/payment/status/:checkoutRequestId', paymentStatus)
