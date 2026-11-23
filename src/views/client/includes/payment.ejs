@@ -41,6 +41,14 @@
             <p id="paymentStatus">STK push has been sent.</p>
             <p>Please check your phone and confirm payment by entering your M-Pesa PIN.</p>
             <button type="button" id="cancelTransaction">Hide Status</button>
+            <section id="manualCodeSection" hidden>
+                <h3>Enter your M-Pesa confirmation code</h3>
+                <p>Use this if automatic confirmation fails. Your order will remain pending until the payment is verified.</p>
+                <label for="manualMpesaCode">M-Pesa code</label>
+                <input type="text" id="manualMpesaCode" maxlength="20" autocomplete="off" placeholder="e.g. QGH7ABC123" required>
+                <button type="button" id="submitManualCode">Submit code for verification</button>
+                <p id="manualCodeFeedback" role="status" aria-live="polite"></p>
+            </section>
         </div>
 
         <div class="recipt" id="paymentReceipt" hidden>
@@ -74,12 +82,20 @@
         }
 
         let paymentPoll = null;
+        let manualCodeTimer = null;
+        let receiptRedirectScheduled = false;
         const checkoutStorageKey = 'prebanaCheckoutRequestId';
+
+        function showManualCodeSection() {
+            document.getElementById('manualCodeSection').hidden = false;
+        }
 
         function startPaymentPolling(checkoutRequestId) {
             document.getElementById('awaitpay').hidden = false;
             document.getElementById('payButton').disabled = true;
             if (paymentPoll) clearInterval(paymentPoll);
+            if (manualCodeTimer) clearTimeout(manualCodeTimer);
+            manualCodeTimer = setTimeout(showManualCodeSection, 60000);
             paymentPoll = setInterval(function () {
                 checkPaymentStatus(checkoutRequestId);
             }, 3000);
@@ -104,26 +120,37 @@
 
                 if (status.status === 'completed' || status.status === 'failed') {
                     clearInterval(paymentPoll);
+                    clearTimeout(manualCodeTimer);
                     sessionStorage.removeItem(checkoutStorageKey);
                     document.getElementById('payButton').disabled = status.status === 'completed';
 
-                    if (status.status === 'completed') {
+                    if (status.status === 'failed') {
+                        showManualCodeSection();
+                    }
+
+                    if (status.status === 'completed' && !receiptRedirectScheduled) {
+                        receiptRedirectScheduled = true;
                         const payerName = document.getElementById('payerName').value.trim();
                         const receipt = {
                             payerName: payerName || (savedOrder ? savedOrder.customerName : ''),
                             phone: document.getElementById('cph').value.trim(),
                             mpesaCode: status.mpesaReceiptNumber || '',
                             checkoutRequestId: checkoutRequestId,
-                            amount: status.amount || (savedOrder ? savedOrder.total : 0),
+                            amount: status.amountPaid || status.amount || (savedOrder ? savedOrder.total : 0),
                             paidAt: status.transactionDate || new Date().toISOString(),
+                            status: 'paid',
                             order: savedOrder
                         };
                         sessionStorage.setItem('prebanaFinalReceipt', JSON.stringify(receipt));
+                        sessionStorage.removeItem('prebanaCart');
 
                         document.getElementById('receiptPayer').textContent = receipt.payerName || '-';
                         document.getElementById('receiptPhone').textContent = receipt.phone || '-';
                         document.getElementById('receiptMpesaCode').textContent = receipt.mpesaCode || '-';
                         document.getElementById('paymentReceipt').hidden = false;
+                        window.setTimeout(function () {
+                            window.location.href = '/preBana/finalrecipt';
+                        }, 1200);
                     }
                 }
             } catch (error) {
@@ -197,6 +224,37 @@
 
         document.getElementById('viewReceipt').addEventListener('click', function () {
             window.location.href = '/preBana/finalrecipt';
+        });
+
+        document.getElementById('submitManualCode').addEventListener('click', function () {
+            const codeInput = document.getElementById('manualMpesaCode');
+            const code = codeInput.value.trim().toUpperCase();
+            const feedback = document.getElementById('manualCodeFeedback');
+            if (!/^[A-Z0-9]{6,20}$/.test(code)) {
+                feedback.textContent = 'Enter a valid M-Pesa code (6–20 letters or numbers).';
+                codeInput.focus();
+                return;
+            }
+            if (!savedOrder) {
+                feedback.textContent = 'Order details are missing. Please return to checkout.';
+                return;
+            }
+
+            const receipt = {
+                payerName: document.getElementById('payerName').value.trim() || savedOrder.customerName || '',
+                phone: document.getElementById('cph').value.trim() || savedOrder.customerPhone || '',
+                mpesaCode: code,
+                checkoutRequestId: sessionStorage.getItem(checkoutStorageKey) || '',
+                amount: savedOrder.total || 0,
+                paidAt: new Date().toISOString(),
+                status: 'pending_verification',
+                order: savedOrder
+            };
+            sessionStorage.setItem('prebanaFinalReceipt', JSON.stringify(receipt));
+            feedback.textContent = 'Code submitted. Your receipt will show the order as pending verification.';
+            window.setTimeout(function () {
+                window.location.href = '/preBana/finalrecipt';
+            }, 500);
         });
     </script>
 

@@ -30,8 +30,11 @@
                 <div class="slinfo">
                     <h4>Payment Details</h4>
                     <div class="info-item"><span>M-Pesa code:</span><p id="mpesaCode">-</p></div>
-                    <div class="info-item"><span>Checkout ID:</span><p id="checkoutId">-</p></div>
-                    <div class="info-item"><span>Status:</span><p>Paid</p></div>
+                    <div class="info-item"><span>Paid by:</span><p id="paymentPayerName">-</p></div>
+                    <div class="info-item"><span>Phone:</span><p id="paymentPhone">-</p></div>
+                    <div class="info-item"><span id="amountPaidLabel">Amount paid:</span><p id="amountPaid">-</p></div>
+                    <div class="info-item"><span>Amount paid:</span><p id="amountPaid">-</p></div>
+                    <div class="info-item"><span>Status:</span><p id="receiptStatus">Paid</p></div>
                 </div>
             </div>
 
@@ -56,7 +59,7 @@
                     <div class="totals-box">
                         <div class="total-row"><span>Product Cost:</span><span id="productCost">Ksh 0.00</span></div>
                         <div class="total-row"><span>Shipping Fees:</span><span id="shippingFees">Ksh 0.00</span></div>
-                        <div class="total-row grand-total"><span>Total Paid:</span><span id="orderTotal">Ksh 0.00</span></div>
+                        <div class="total-row grand-total"><span id="orderTotalLabel">Total Paid:</span><span id="orderTotal">Ksh 0.00</span></div>
                     </div>
                 </div>
             </div>
@@ -79,12 +82,22 @@
             const payerName = receipt.payerName || order.customerName || '-';
             const payerPhone = receipt.phone || order.customerPhone || '-';
             const paidDate = receipt.paidAt ? new Date(receipt.paidAt) : new Date();
+            const amountPaid = Number(receipt.amount) || Number(order.total) || 0;
+            const isPendingVerification = receipt.status === 'pending_verification';
 
             document.getElementById('payerName').textContent = payerName;
-            document.getElementById('payerPhone').textContent = payerPhone;
+            document.getElementById('payerPhone').textContent = maskPhone(payerPhone);
             document.getElementById('payerLocation').textContent = order.customerLocation || '-';
             document.getElementById('mpesaCode').textContent = receipt.mpesaCode || '-';
-            document.getElementById('checkoutId').textContent = receipt.checkoutRequestId || '-';
+            document.getElementById('paymentPayerName').textContent = payerName;
+            document.getElementById('paymentPhone').textContent = maskPhone(payerPhone);
+            document.getElementById('amountPaid').textContent = 'Ksh ' + amountPaid.toFixed(2);
+            document.getElementById('receiptStatus').textContent =
+                isPendingVerification ? 'Pending verification' : 'Paid';
+            if (isPendingVerification) {
+                document.getElementById('amountPaidLabel').textContent = 'Amount submitted:';
+                document.getElementById('orderTotalLabel').textContent = 'Order total:';
+            }
             document.getElementById('receiptDate').textContent =
                 'Date: ' + (isNaN(paidDate.getTime()) ? '-' : paidDate.toLocaleString());
 
@@ -108,7 +121,7 @@
                     return sum + (Number(product.price) * (Number(product.quantity) || 0));
                 }, 0);
             const shippingFees = Number(order.shippingFees) || 0;
-            const total = Number(receipt.amount) || productCost + shippingFees;
+            const total = amountPaid || productCost + shippingFees;
 
             document.getElementById('totalProducts').textContent = (order.products || []).length;
             document.getElementById('totalQuantity').textContent = totalQuantity;
@@ -127,6 +140,12 @@
                     "'": '&#039;'
                 }[character];
             });
+        }
+
+        function maskPhone(value) {
+            const phone = String(value || '');
+            if (phone.length < 7) return phone || '-';
+            return phone.slice(0, 3) + '*'.repeat(phone.length - 6) + phone.slice(-3);
         }
     </script>
 </body>
