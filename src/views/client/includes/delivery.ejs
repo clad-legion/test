@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PreBana Cosmetics - Delivery Details</title>
+    <link rel="stylesheet" href="/css/shck2.css">
+    <style>
+        .delivery-page {
+            min-height: auto;
+        }
+
+        .delivery-intro {
+            margin: 0 0 24px;
+            color: #831843;
+            line-height: 1.5;
+        }
+
+        .delivery-form {
+            display: grid;
+            gap: 10px;
+            max-width: 520px;
+        }
+
+        .delivery-form label {
+            margin-top: 8px;
+            color: #831843;
+            font-size: 14px;
+            font-weight: 700;
+        }
+
+        .delivery-form input {
+            width: 100%;
+            border: 1px solid #e8cdd8;
+            border-radius: 6px;
+            padding: 12px;
+            color: #1f2937;
+            background: #fff;
+        }
+
+        .delivery-actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 18px;
+        }
+
+        .delivery-actions a {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 4px;
+            padding: 10px 16px;
+            background: #fce7f3;
+            color: #831843;
+            font-weight: 700;
+            text-decoration: none;
+        }
+    </style>
+</head>
+<body>
+    <main class="chck2 delivery-page">
+        <header class="tpdt">
+            <a class="logo" href="/preBana/store" aria-label="Return to shop" style="color: inherit; text-decoration: none;">
+                <img src="/uploads/f9defe2877af00458a37ce29ee922df7~tplv-tiktokx-cropcenter_1080_1080.jpeg" alt="PreBana Cosmetics logo">
+                <h2>PreBana<span>Cosmetics</span></h2>
+            </a>
+            <div class="invoice-title">
+                <h1>Delivery</h1>
+                <p>Step 1 of 2</p>
+            </div>
+        </header>
+
+        <h2>Where should we deliver your order?</h2>
+        <p class="delivery-intro">Enter the recipient’s name, a contact phone number, and the preferred delivery location.</p>
+
+        <form class="delivery-form" id="deliveryForm">
+            <label for="deliveryName">Recipient name</label>
+            <input id="deliveryName" name="name" type="text" minlength="2" maxlength="80" autocomplete="name" required>
+
+            <label for="deliveryPhone">Delivery phone number</label>
+            <input id="deliveryPhone" name="phone" type="tel" inputmode="tel" autocomplete="tel" pattern="(?:\+?254|0)(?:7|1)[0-9]{8}" placeholder="07XXXXXXXX" required>
+
+            <label for="deliveryLocation">Preferred delivery location</label>
+            <input id="deliveryLocation" name="location" type="text" minlength="3" maxlength="200" autocomplete="street-address" placeholder="Town, estate, street or landmark" required>
+
+            <div class="delivery-actions">
+                <a href="/preBana/cart">Back to cart</a>
+                <button type="submit" class="btn-pay">Continue to checkout</button>
+            </div>
+        </form>
+    </main>
+
+    <script>
+        const deliveryForm = document.getElementById('deliveryForm');
+        const savedDelivery = JSON.parse(sessionStorage.getItem('prebanaDelivery') || 'null');
+
+        if (savedDelivery) {
+            document.getElementById('deliveryName').value = savedDelivery.name || '';
+            document.getElementById('deliveryPhone').value = savedDelivery.phone || '';
+            document.getElementById('deliveryLocation').value = savedDelivery.location || '';
+        }
+
+        deliveryForm.addEventListener('submit', function (event) {
+            event.preventDefault();
+            if (!deliveryForm.reportValidity()) return;
+
+            const delivery = {
+                name: document.getElementById('deliveryName').value.trim(),
+                phone: document.getElementById('deliveryPhone').value.trim(),
+                location: document.getElementById('deliveryLocation').value.trim()
+            };
+            sessionStorage.setItem('prebanaDelivery', JSON.stringify(delivery));
+            window.location.href = '/preBana/checkout';
+        });
+    </script>
+</body>
+</html>

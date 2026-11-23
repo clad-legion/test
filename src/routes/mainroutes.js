@@ -21,6 +21,10 @@ router.get('/cart', (req, res) => {
     res.status(200).render('client/includes/cart')
 })
 
+router.get('/delivery', (req, res) => {
+    res.status(200).render('client/includes/delivery')
+})
+
 router.get('/checkout', (req, res) => {
     res.status(200).render('client/includes/chck2')
 })

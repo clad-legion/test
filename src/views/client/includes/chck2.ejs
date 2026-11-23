@@ -5,6 +5,19 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>PreBana Cosmetics - Invoice</title>
     <link rel="stylesheet" href="/css/shck2.css">
+    <style>
+        .delivery-heading {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 8px;
+        }
+
+        .delivery-heading button {
+            padding: 6px 10px;
+            font-size: 12px;
+        }
+    </style>
 </head>
 <body>
 
@@ -26,25 +39,21 @@
             <div class="details-row">
                 <!-- Client Details on the Left -->
                 <div class="slinfo">
-                    <h4>Delivery To (Client)</h4>
+                    <div class="delivery-heading">
+                        <h4>Delivery To (Client)</h4>
+                        <button type="button" id="changeDelivery">Change Delivery</button>
+                    </div>
                     <div class="info-item">
                         <span>Name:</span>
-                        <p>Robert</p>
+                        <p id="deliveryNameValue">Not provided</p>
                     </div>
                     <div class="info-item">
                         <span>Phone Number:</span>
-                        <p>0797510626</p>
+                        <p id="deliveryPhoneValue">Not provided</p>
                     </div>
                     <div class="info-item">
                         <span>Location:</span>
-                        <input
-                            id="deliveryLocation"
-                            type="text"
-                            maxlength="200"
-                            placeholder="Enter your preferred delivery location"
-                            autocomplete="street-address"
-                            required
-                        >
+                        <p id="deliveryLocationValue">Not provided</p>
                     </div>
                 </div>
 
@@ -148,6 +157,17 @@
     <script>
         const shippingFees = 30;
 
+        const deliveryDetails = JSON.parse(sessionStorage.getItem('prebanaDelivery') || 'null');
+        if (deliveryDetails) {
+            document.getElementById('deliveryNameValue').textContent = deliveryDetails.name;
+            document.getElementById('deliveryPhoneValue').textContent = deliveryDetails.phone;
+            document.getElementById('deliveryLocationValue').textContent = deliveryDetails.location;
+        }
+
+        document.getElementById('changeDelivery').addEventListener('click', function () {
+            window.location.href = '/preBana/delivery';
+        });
+
         const savedCart = JSON.parse(sessionStorage.getItem('prebanaCart') || 'null');
         const cart = Array.isArray(savedCart) ? savedCart : [];
         if (cart.length === 0) {
@@ -203,6 +223,7 @@
         document.getElementById('cancelOrder').addEventListener('click', function () {
             sessionStorage.removeItem('prebanaCart');
             sessionStorage.removeItem('prebanaOrder');
+            sessionStorage.removeItem('prebanaDelivery');
             window.location.href = '/preBana/store';
         });
 
@@ -211,20 +232,17 @@
         });
 
         document.getElementById('proceedToPayment').addEventListener('click', function () {
-            const deliveryCard = document.querySelectorAll('.details-row .slinfo')[0];
-            const vendorCard = document.querySelectorAll('.details-row .slinfo')[1];
-            const deliveryLocation = document.getElementById('deliveryLocation').value.trim();
-            if (deliveryLocation.length < 3) {
-                alert('Enter your preferred delivery location.');
-                document.getElementById('deliveryLocation').focus();
+            if (!deliveryDetails) {
+                window.location.href = '/preBana/delivery';
                 return;
             }
+            const vendorCard = document.querySelectorAll('.details-row .slinfo')[1];
             const totals = calculateOrderTotals();
 
             const order = {
-                customerName: deliveryCard.querySelectorAll('.info-item p')[0].textContent.trim(),
-                customerPhone: deliveryCard.querySelectorAll('.info-item p')[1].textContent.trim(),
-                customerLocation: deliveryLocation,
+                customerName: deliveryDetails.name,
+                customerPhone: deliveryDetails.phone,
+                customerLocation: deliveryDetails.location,
                 businessName: vendorCard.querySelectorAll('.info-item p')[0].textContent.trim(),
                 businessPhone: vendorCard.querySelectorAll('.info-item p')[1].textContent.trim(),
                 shop: vendorCard.querySelectorAll('.info-item p')[2].textContent.trim(),
