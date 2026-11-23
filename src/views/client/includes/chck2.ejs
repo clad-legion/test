@@ -12,10 +12,10 @@
         <div class="chckForm">
             <!-- Header -->
             <div class="tpdt">
-                <div class="logo">
+                <a class="logo" href="/preBana/store" aria-label="Return to shop" style="color: inherit; text-decoration: none;">
                     <img src="/uploads/f9defe2877af00458a37ce29ee922df7~tplv-tiktokx-cropcenter_1080_1080.jpeg" alt="PreBana Cosmetics logo">
                     <h2>PreBana<span>Cosmetics</span></h2>
-                </div>
+                </a>
                 <div class="invoice-title">
                     <h1>INVOICE</h1>
                     <p>Date: November 22, 2026</p>
@@ -139,6 +139,7 @@
         <!-- Bottom Action Buttons -->
         <div class="actions">
             <button type="button" class="btn-cancel" id="cancelOrder">Cancel Order</button>
+            <button type="button" class="btn-cancel" id="backToShop">Back to Shop</button>
             <!-- <button type="button" class="btn-print" onclick="window.print()">Download / Print PDF</button> -->
            <button type="button" class="btn-pay" id="proceedToPayment">Proceed to Pay</button>
         </div>
@@ -202,7 +203,11 @@
         document.getElementById('cancelOrder').addEventListener('click', function () {
             sessionStorage.removeItem('prebanaCart');
             sessionStorage.removeItem('prebanaOrder');
-            window.location.href = '/preBana/cart';
+            window.location.href = '/preBana/store';
+        });
+
+        document.getElementById('backToShop').addEventListener('click', function () {
+            window.location.href = '/preBana/store';
         });
 
         document.getElementById('proceedToPayment').addEventListener('click', function () {
