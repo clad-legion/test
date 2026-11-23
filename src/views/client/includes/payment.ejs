@@ -4,12 +4,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>PreBana || Payment</title>
-    <link rel="stylesheet" href="/public/css/shck2.css">
+    <link rel="stylesheet" href="/css/shck2.css">
 </head>
 <body>
     <div class="paymentData">
         <div class="logo">
-            <img src="/public/uploads/f9defe2877af00458a37ce29ee922df7~tplv-tiktokx-cropcenter_1080_1080.jpeg" alt="PreBana Cosmetics logo">
+            <img src="/uploads/f9defe2877af00458a37ce29ee922df7~tplv-tiktokx-cropcenter_1080_1080.jpeg" alt="PreBana Cosmetics logo">
             <h2>PreBana<span>Cosmetics</span></h2>
         </div>
 
@@ -66,21 +66,73 @@
             savedOrder.productCost = productCost;
         }
 
-        document.getElementById('payButton').addEventListener('click', function () {
+        let paymentPoll = null;
+
+        async function checkPaymentStatus(checkoutRequestId) {
+            try {
+                const response = await fetch('/preBana/payment/status/' + encodeURIComponent(checkoutRequestId));
+                if (!response.ok) return;
+                const status = await response.json();
+                document.getElementById('paymentStatus').textContent =
+                    status.status === 'completed'
+                        ? 'Payment successful. M-Pesa receipt: ' + (status.mpesaReceiptNumber || '-')
+                        : status.status === 'failed'
+                            ? 'Payment failed: ' + (status.resultDescription || 'The transaction was not completed.')
+                            : 'Waiting for phone confirmation...';
+
+                if (status.status === 'completed' || status.status === 'failed') {
+                    clearInterval(paymentPoll);
+                }
+            } catch (error) {
+                // Keep polling when a temporary network error occurs.
+            }
+        }
+
+        document.getElementById('payButton').addEventListener('click', async function () {
             const phone = document.getElementById('cph').value.trim();
             if (!/^0\d{9}$/.test(phone)) {
                 alert('Enter a valid Kenyan phone number starting with 0.');
                 return;
             }
+            if (!savedOrder) {
+                alert('Your order details are missing. Please return to checkout.');
+                return;
+            }
 
             document.getElementById('awaitpay').hidden = false;
-            document.getElementById('paymentStatus').textContent =
-                'STK push has been sent to ' + phone + ' for Ksh ' +
-                (savedOrder ? savedOrder.total.toFixed(2) : '0.00') + '.';
+            document.getElementById('paymentStatus').textContent = 'Sending M-Pesa request...';
+            document.getElementById('payButton').disabled = true;
+
+            try {
+                const response = await fetch('/preBana/payment/stk', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        phone: phone,
+                        products: savedOrder.products
+                    })
+                });
+                const result = await response.json();
+                if (!response.ok) throw new Error(result.error || 'Could not initiate payment.');
+
+                document.getElementById('paymentStatus').textContent =
+                    'STK push sent to ' + phone + ' for Ksh ' + result.amount.toFixed(2) + '.';
+                paymentPoll = setInterval(function () {
+                    checkPaymentStatus(result.checkoutRequestId);
+                }, 3000);
+                setTimeout(function () {
+                    checkPaymentStatus(result.checkoutRequestId);
+                }, 1000);
+            } catch (error) {
+                document.getElementById('paymentStatus').textContent = error.message;
+                document.getElementById('payButton').disabled = false;
+            }
         });
 
         document.getElementById('cancelTransaction').addEventListener('click', function () {
             document.getElementById('awaitpay').hidden = true;
+            if (paymentPoll) clearInterval(paymentPoll);
+            document.getElementById('payButton').disabled = false;
         });
     </script>
 

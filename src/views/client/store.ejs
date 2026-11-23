@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PreBana Cosmetics | Shop</title>
+    <style>
+        * { box-sizing: border-box; }
+        body { margin: 0; padding: 24px; color: #333; background: #fdf2f8; font-family: Arial, sans-serif; }
+        header, main { max-width: 1000px; margin: 0 auto; }
+        header { display: flex; justify-content: space-between; align-items: center; padding: 16px 20px; background: white; border-top: 6px solid #db2777; }
+        .brand { display: flex; align-items: center; gap: 12px; color: #be185d; }
+        .brand img { width: 64px; height: 64px; object-fit: contain; }
+        nav a { margin-left: 18px; color: #831843; font-weight: bold; text-decoration: none; }
+        main { padding: 24px 0; }
+        .products { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 18px; }
+        .product { padding: 20px; background: white; border: 1px solid #fbcfe8; border-radius: 6px; }
+        .product h2 { margin-top: 0; color: #be185d; }
+        .product p { color: #555; }
+        .price { font-weight: bold; }
+        button { padding: 10px 16px; border: 0; border-radius: 4px; background: #db2777; color: white; font-weight: bold; cursor: pointer; }
+        button:hover { background: #be185d; }
+        #notice { min-height: 24px; color: #831843; }
+        @media (max-width: 560px) { body { padding: 12px; } header { align-items: flex-start; flex-direction: column; gap: 12px; } nav a { margin: 0 14px 0 0; } }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="brand">
+            <img src="/uploads/f9defe2877af00458a37ce29ee922df7~tplv-tiktokx-cropcenter_1080_1080.jpeg" alt="PreBana Cosmetics logo">
+            <h1>PreBana Cosmetics</h1>
+        </div>
+        <nav aria-label="Main navigation">
+            <a href="/preBana/store">Shop</a>
+            <a href="/preBana/cart">Cart (<span id="cart-count">0</span>)</a>
+        </nav>
+    </header>
+    <main>
+        <h2>Shop our products</h2>
+        <p id="notice" role="status" aria-live="polite"></p>
+        <section class="products" aria-label="Products">
+            <% products.forEach(function (product) { %>
+                <article class="product">
+                    <h2><%= product.name %></h2>
+                    <p>Product ID: <%= product.id %></p>
+                    <p class="price">Ksh <%= Number(product.price).toFixed(2) %></p>
+                    <button type="button" class="add-to-cart" data-product-id="<%= product.id %>">Add to cart</button>
+                </article>
+            <% }) %>
+        </section>
+    </main>
+    <script id="product-catalog" type="application/json"><%- JSON.stringify(products).replace(/</g, '\\u003c') %></script>
+    <script>
+        const catalog = JSON.parse(document.getElementById('product-catalog').textContent);
+        const cartKey = 'prebanaCart';
+
+        function getCart() {
+            return JSON.parse(sessionStorage.getItem(cartKey) || '[]');
+        }
+
+        function updateCartCount() {
+            document.getElementById('cart-count').textContent = getCart().reduce(function (sum, item) {
+                return sum + item.quantity;
+            }, 0);
+        }
+
+        document.querySelectorAll('.add-to-cart').forEach(function (button) {
+            button.addEventListener('click', function () {
+                const product = catalog.find(function (item) {
+                    return item.id === button.dataset.productId;
+                });
+                if (!product) return;
+
+                const cart = getCart();
+                const existing = cart.find(function (item) { return item.id === product.id; });
+                if (existing) {
+                    existing.quantity += 1;
+                } else {
+                    cart.push({ name: product.name, id: product.id, price: Number(product.price), quantity: 1 });
+                }
+
+                sessionStorage.setItem(cartKey, JSON.stringify(cart));
+                updateCartCount();
+                document.getElementById('notice').textContent = product.name + ' added to your cart.';
+            });
+        });
+
+        updateCartCount();
+    </script>
+</body>
+</html>

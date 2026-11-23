@@ -4,13 +4,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>PreBana Cosmetics - Cart</title>
-    <link rel="stylesheet" href="/public/css/shck2.css">
+    <link rel="stylesheet" href="/css/shck2.css">
 </head>
 <body>
     <main class="cart-page">
         <header class="cart-header">
             <div class="logo">
-                <img src="/public/uploads/f9defe2877af00458a37ce29ee922df7~tplv-tiktokx-cropcenter_1080_1080.jpeg" alt="PreBana Cosmetics logo">
+                <img src="/uploads/f9defe2877af00458a37ce29ee922df7~tplv-tiktokx-cropcenter_1080_1080.jpeg" alt="PreBana Cosmetics logo">
                 <h2>PreBana<span>Cosmetics</span></h2>
             </div>
             <h1>Shopping Cart</h1>
@@ -54,16 +54,7 @@
 
     <script>
         const shippingFees = 30;
-        const defaultCart = [
-            { name: 'Luron', id: 'bd-luron', quantity: 1, price: 10 },
-            { name: 'Toner', id: 'fc-toner', quantity: 1, price: 20 },
-            { name: 'Amara Body Lotion', id: 'bd-amara', quantity: 1, price: 20 },
-            { name: 'Sun Screen', id: 'fc-ss', quantity: 1, price: 20 },
-            { name: 'Night cream', id: 'fc-nc', quantity: 1, price: 20 },
-            { name: 'Day cream', id: 'fc-dc', quantity: 1, price: 20 }
-        ];
-
-        let cart = JSON.parse(sessionStorage.getItem('prebanaCart') || 'null') || defaultCart;
+        let cart = JSON.parse(sessionStorage.getItem('prebanaCart') || '[]');
 
         function saveCart() {
             sessionStorage.setItem('prebanaCart', JSON.stringify(cart));
@@ -127,7 +118,7 @@
 
         document.getElementById('checkoutButton').addEventListener('click', function () {
             sessionStorage.setItem('prebanaCart', JSON.stringify(cart));
-            window.location.href = '/checkout';
+            window.location.href = '/preBana/checkout';
         });
 
         renderCart();

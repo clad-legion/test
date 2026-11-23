@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>PreBana Cosmetics - Invoice</title>
-    <link rel="stylesheet" href="/public/css/shck2.css">
+    <link rel="stylesheet" href="/css/shck2.css">
 </head>
 <body>
 
@@ -13,7 +13,7 @@
             <!-- Header -->
             <div class="tpdt">
                 <div class="logo">
-                    <img src="/public/uploads/f9defe2877af00458a37ce29ee922df7~tplv-tiktokx-cropcenter_1080_1080.jpeg" alt="PreBana Cosmetics logo">
+                    <img src="/uploads/f9defe2877af00458a37ce29ee922df7~tplv-tiktokx-cropcenter_1080_1080.jpeg" alt="PreBana Cosmetics logo">
                     <h2>PreBana<span>Cosmetics</span></h2>
                 </div>
                 <div class="invoice-title">
@@ -140,7 +140,12 @@
     <script>
         const shippingFees = 30;
 
-        const cart = JSON.parse(sessionStorage.getItem('prebanaCart') || 'null');
+        const savedCart = JSON.parse(sessionStorage.getItem('prebanaCart') || 'null');
+        const cart = Array.isArray(savedCart) ? savedCart : [];
+        if (cart.length === 0) {
+            window.location.replace('/preBana/cart');
+        }
+
         if (cart) {
             const tbody = document.querySelector('tbody');
             tbody.innerHTML = '';
@@ -208,7 +213,7 @@
             };
 
             sessionStorage.setItem('prebanaOrder', JSON.stringify(order));
-            window.location.href = '/payment';
+            window.location.href = '/preBana/payment';
         });
     </script>
 
