@@ -257,6 +257,7 @@
 
         <div class="actions">
             <button type="button" class="btn-cancel" onclick="window.location.href='/preBana/store'">Back to shop</button>
+            <button type="button" class="btn-pay" id="downloadReceipt">Download receipt PDF</button>
             <button type="button" class="btn-pay" onclick="window.print()">Print receipt</button>
         </div>
     </div>
@@ -338,6 +339,144 @@
             const phone = String(value || '');
             if (phone.length < 7) return phone || '-';
             return phone.slice(0, 3) + '*'.repeat(phone.length - 6) + phone.slice(-3);
+        }
+
+        function normalizePdfText(value) {
+            return String(value || '')
+                .normalize('NFKD')
+                .replace(/[\u0300-\u036f]/g, '')
+                .replace(/[^\x20-\x7E]/g, '?');
+        }
+
+        function escapePdfText(value) {
+            return normalizePdfText(value).replace(/[\\()]/g, '\\$&');
+        }
+
+        function wrapPdfLine(value, maxLength) {
+            const words = normalizePdfText(value).split(/\s+/);
+            const wrapped = [];
+            let line = '';
+
+            words.forEach(function (word) {
+                while (word.length > maxLength) {
+                    if (line) {
+                        wrapped.push(line);
+                        line = '';
+                    }
+                    wrapped.push(word.slice(0, maxLength));
+                    word = word.slice(maxLength);
+                }
+
+                if (!word) return;
+                if (line && (line.length + word.length + 1) > maxLength) {
+                    wrapped.push(line);
+                    line = word;
+                } else {
+                    line = line ? line + ' ' + word : word;
+                }
+            });
+
+            if (line) wrapped.push(line);
+            return wrapped;
+        }
+
+        function downloadReceiptPdf() {
+            const pendingVerification = receipt.status === 'pending_verification';
+            const pdfProductCost = Number(order.productCost) ||
+                (order.products || []).reduce(function (sum, product) {
+                    return sum + (Number(product.price) * (Number(product.quantity) || 0));
+                }, 0);
+            const pdfShippingFees = Number(order.shippingFees) || 0;
+            const pdfAmount = Number(receipt.amount) || Number(order.total) || 0;
+            const lines = [
+                'PreBana Cosmetics',
+                'RECEIPT',
+                'Date: ' + (document.getElementById('receiptDate').textContent.replace(/^Date:\s*/, '') || '-'),
+                '------------------------------------------',
+                'Payer: ' + (receipt.payerName || order.customerName || '-'),
+                'Payment phone: ' + maskPhone(receipt.phone || order.customerPhone),
+                'M-Pesa code: ' + (receipt.mpesaCode || '-'),
+                'Status: ' + (pendingVerification ? 'Pending verification' : 'Paid'),
+                '------------------------------------------',
+                'ITEMS'
+            ];
+
+            (order.products || []).forEach(function (product) {
+                const quantity = Number(product.quantity) || 0;
+                lines.push(
+                    (product.name || 'Product') + ' x' + quantity +
+                    ' - Ksh ' + (Number(product.price) * quantity).toFixed(2)
+                );
+            });
+
+            lines.push(
+                '------------------------------------------',
+                'Product cost: Ksh ' + pdfProductCost.toFixed(2),
+                'Shipping: Ksh ' + pdfShippingFees.toFixed(2),
+                (pendingVerification ? 'Order total: ' : 'Amount paid: ') + 'Ksh ' + pdfAmount.toFixed(2),
+                '------------------------------------------',
+                'DELIVERY',
+                'Location: ' + (order.customerLocation || '-'),
+                'Phone: ' + maskPhone(order.customerPhone || '-')
+            );
+
+            const wrappedLines = lines.reduce(function (all, line) {
+                return all.concat(wrapPdfLine(line, 40));
+            }, []);
+            const pageWidth = 226.77;
+            const pageHeight = Math.max(300, wrappedLines.length * 12 + 40);
+            let y = pageHeight - 22;
+            const commands = ['BT', '/F1 9 Tf'];
+
+            wrappedLines.forEach(function (line, index) {
+                if (index === 0) commands.push('/F1 12 Tf');
+                else if (index === 1) commands.push('/F1 10 Tf');
+                else if (index === 2) commands.push('/F1 8 Tf');
+                else if (index === 3) commands.push('/F1 7 Tf');
+                else if (index === 4) commands.push('/F1 9 Tf');
+
+                commands.push('1 0 0 1 12 ' + y + ' Tm (' + escapePdfText(line) + ') Tj');
+                y -= 12;
+            });
+            commands.push('ET');
+
+            const content = commands.join('\n');
+            const objects = [
+                '<< /Type /Catalog /Pages 2 0 R >>',
+                '<< /Type /Pages /Kids [3 0 R] /Count 1 >>',
+                '<< /Type /Page /Parent 2 0 R /MediaBox [0 0 ' + pageWidth + ' ' + pageHeight + '] /Resources << /Font << /F1 4 0 R >> >> /Contents 5 0 R >>',
+                '<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica /Encoding /WinAnsiEncoding >>',
+                '<< /Length ' + content.length + ' >>\nstream\n' + content + '\nendstream'
+            ];
+
+            let pdf = '%PDF-1.4\n';
+            const offsets = [0];
+            objects.forEach(function (object, index) {
+                offsets.push(pdf.length);
+                pdf += (index + 1) + ' 0 obj\n' + object + '\nendobj\n';
+            });
+
+            const xrefOffset = pdf.length;
+            pdf += 'xref\n0 ' + (objects.length + 1) + '\n0000000000 65535 f \n';
+            offsets.slice(1).forEach(function (offset) {
+                pdf += String(offset).padStart(10, '0') + ' 00000 n \n';
+            });
+            pdf += 'trailer\n<< /Size ' + (objects.length + 1) + ' /Root 1 0 R >>\nstartxref\n' + xrefOffset + '\n%%EOF';
+
+            const blob = new Blob([pdf], { type: 'application/pdf' });
+            const link = document.createElement('a');
+            const receiptCode = (receipt.mpesaCode || 'receipt').replace(/[^a-z0-9-]/gi, '');
+            link.href = URL.createObjectURL(blob);
+            link.download = 'PreBana-' + receiptCode + '.pdf';
+            link.click();
+            window.setTimeout(function () {
+                URL.revokeObjectURL(link.href);
+            }, 1000);
+        }
+
+        const downloadButton = document.getElementById('downloadReceipt');
+        if (downloadButton && receipt && order) {
+            downloadButton.addEventListener('click', downloadReceiptPdf);
         }
     </script>
 </body>
